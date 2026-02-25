@@ -277,7 +277,8 @@ $(bitstring(i)) in binary.
         global answers *= "\n"
     end
 end
-write("answers.txt", answers)
-println("Saved answers to \"answers.txt\"."
+answers_filename = "answers_floating_point.txt"
+write(answers_filename, answers)
+println("Saved answers to $(answers_filename).")
 
 # remember to have a case each for nan, inf, normal, and subnormal numbers
