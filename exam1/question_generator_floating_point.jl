@@ -1,29 +1,7 @@
-#########################
-println("PROVIDED CHARTS")
-for i in (1:-1:-10)
-    i >= 0 && print(" ") # Indent nonnegative numbers with a space
-    print("$i   ")
-    abs(i) < 10 && print(" ")
-    println("$(2.0^i)")
-end
-println()
 
-# https://cloud.google.com/blog/products/ai-machine-learning/bfloat16-the-secret-to-high-performance-on-cloud-tpus
-# https://developer.nvidia.com/blog/floating-point-8-an-introduction-to-efficient-lower-precision-ai-training/
-println("""
-All the below representations conform to the IEEE behaviors for NaN
-and Inf that we have been studying.  Each one is as wide as its name
-implies.
-
-Name            |Exponent Width|Bias
-FP8 E5M2 (8-bit)|      5       |  15
-Google BFloat16 |      8       | 127
-IEEE binary16   |      5       |  15
-IEEE binary32   |      8       | 127
-IEEE binary64   |     11       |1023
-""")
-
-
+# The following four functions receive an unsigned integer
+# and return a potentially narrower integer alongside with
+# that integer's bytes interpreted as a floating point number.
 function interpret_f8(i::UInt8)
    i = UInt16(i) << 8
    return interpret_f8(i)
@@ -45,7 +23,6 @@ function interpret_bf16(i::UInt32)
     return (i, f)
 end
 function random_inf(t::AbstractString)
-    s = rand([0x8000 0x0000]) # negative or positive 8-bit zero
     if t == "IEEE binary16" || t == "F8 E5M2"
         f = rand([-Inf16 +Inf16])
         i = reinterpret(UInt16, f)
@@ -64,9 +41,11 @@ end
 """
 Reinterprets an unsigned integer as the requested float.
 
-Returns a new integer that is exactly as wide as the requested float, by truncating the lower bits.
+Returns a new integer that is exactly as wide as the requested float, by truncating the lower bits if necessary.
 
 bf16 and E5M2 are the same as truncating a Float32 and Float16, respectively.
+
+At all points in the process, the only rounding that might be done should be truncation.
 """
 function interpret_int_as_float(i::Unsigned, t::AbstractString)
     if t == "IEEE binary16"
@@ -118,6 +97,7 @@ function hex_to_bubbles(i::Unsigned, t::AbstractString)
     error("Could not parse i=$i and t=$t.")
 end
 
+# todo: constrain magnitude by drawing random from correct type.
 function generate_decimal_bubble_options(f, t)::String
     p = if t == "IEEE binary16";        precision(Float16) # = 11
     elseif t == "Google Brain Float16"; 8
@@ -147,6 +127,34 @@ function generate_decimal_bubble_options(f, t)::String
     return options
 end
 
+
+
+#########################
+println("PROVIDED CHARTS")
+for i in (1:-1:-10)
+    i >= 0 && print(" ") # Indent nonnegative numbers with a space
+    print("$i   ")
+    abs(i) < 10 && print(" ")
+    println("$(2.0^i)")
+end
+println()
+
+# https://cloud.google.com/blog/products/ai-machine-learning/bfloat16-the-secret-to-high-performance-on-cloud-tpus
+# https://developer.nvidia.com/blog/floating-point-8-an-introduction-to-efficient-lower-precision-ai-training/
+println("""
+All the below representations conform to the IEEE behaviors for NaN
+and Inf that we have been studying.  Each one is as wide as its name
+implies.
+
+Name            |Exponent Width|Bias
+FP8 E5M2 (8-bit)|      5       |  15
+Google BFloat16 |      8       | 127
+IEEE binary16   |      5       |  15
+IEEE binary32   |      8       | 127
+IEEE binary64   |     11       |1023
+""")
+
+
 answers = ""
 const REPRESENTATION_NAMES =  [
     "IEEE binary16"
@@ -154,7 +162,8 @@ const REPRESENTATION_NAMES =  [
     "F8 E5M2"]
 
 ############################
-println("DECIMAL TO BINARY")
+print("DECIMAL TO BINARY. ")
+println("For the following questions, round towards zero (truncate).")
 question_number = 0
 for t in REPRESENTATION_NAMES
     global question_number += 1
@@ -168,8 +177,9 @@ for t in REPRESENTATION_NAMES
         i, f = interpret_int_as_float(i, t)
     end
     hex = "0x" * string(i, base=16) # hex string
+    println(question_number, ". Convert $f into $t. ")
     if typeof(i) == UInt8
-        println(question_number, ". Convert $f into $t. \n", BUBBLE_STRING)
+        println(BUBBLE_STRING)
         global answers *=
 """Answer for question $(question_number):
 $f as $t is $hex in hex, expressed as
@@ -181,7 +191,6 @@ in the bubble sheet.
     elseif typeof(i) == UInt16
         # Assumes that the only 16-bit floats are IEEE and bf16.
         a, b = t == "IEEE binary16" ? ("six", "ten") : ("nine", "seven")
-        println(question_number, ". Convert $f into $t. ")
         println(question_number, "a. Provide the first $a bits. \n",
                 BUBBLE_STRING)
         println(question_number, "b. Provide the last $b bits. \n",
@@ -280,5 +289,3 @@ end
 answers_filename = "answers_floating_point.txt"
 write(answers_filename, answers)
 println("Saved answers to $(answers_filename).")
-
-# remember to have a case each for nan, inf, normal, and subnormal numbers
