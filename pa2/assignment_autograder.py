@@ -5,7 +5,7 @@ from toHex import autograder as toHex_autograder
 from binSub import autograder as binSub_autograder
 # from anyToAny import autograder as anyToAny_autograder
 # from fermiDirac import autograder as fermiDirac_autograder
- from rootFinder import autograder as rootFinder_autograder
+from rootFinder import autograder as rootFinder_autograder
 from binToFloat import autograder as binToFloat_autograder
 from doubleToBin import autograder as doubleToBin_autograder
 from floatMul import autograder as floatMul_autograder
