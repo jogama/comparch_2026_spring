@@ -51,12 +51,27 @@ def generate_answer_strings(code):
     bitstring = '0'*(8-len(bitstring)) + bitstring # pad with leading zeros.
     bubblestring = list(bitstring + '00') # we have ten bubbles
     for i in range(10):
-        if bubblestring[i] == '0':
+        if bubblestring[i] == '0':1
             bubblestring[i] = bubbles[i]
         else:
             bubblestring[i] = '●'
     bubblestring = ' '.join(bubblestring)    
     return (hexstring, "0b"+bitstring, bubblestring)
+
+print("""PROVIDED INFORMATION
+Precedence in C, descending: ~, &, ^, |.
+Is commutative: AND, OR, XOR.
+Is associative: AND, OR, XOR.
+Is idempotent: AND, OR.
+Complements: A|!A=1, A^!A=1, A&!A=0
+Identities: A|0=A, A^0=A, A&1=A
+
+De Morgan's Laws (NOT distribution)
+!(A & B) = !A | !B
+!(A | B) = !A & !B 
+!(A ^ B) = !A ^ B = A ^ !B
+""")
+
 
 answers = ""
 for question in range(1, 9):
