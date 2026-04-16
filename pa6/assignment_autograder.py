@@ -48,4 +48,4 @@ else:
     total += setAssociative_autograder.grade_setAssociative ( path="setAssociative/", verbose=False )
     total += binSub_autograder.grade_binSub ( path="binSub/", verbose=False )
 
-print ("Score on assignment: {} out of 75.".format(total))
+print ("Score on assignment: {} out of 100.".format(total))
